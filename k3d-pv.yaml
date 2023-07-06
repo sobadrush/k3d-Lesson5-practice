@@ -1,0 +1,15 @@
+# 請記得只有 Cluster Admin可更動
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: k3d-volume
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath: # 需與 Cluster 建立時的路徑對齊
+    path: "/tmp/k3dvol"

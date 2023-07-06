@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: &appname masa-base-webapp
+  namespace: k3d-tst
+  labels:
+    app: *appname
+    version: v1
+  annotations: # 如果有 sidecar 引用會需要放在這
+spec:
+  # 部署更新策略，可以設定為
+  # Recreate：先砍後建
+  # RollingUpdate：再多個PDO的狀況下，可進行滾動部署，終止一個POD，就建立一個對應的POD，建議使用預設的 RollingUpdate
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  replicas: 2
+  selector:
+    matchLabels:
+      app: *appname
+  template:
+    metadata:
+      labels:
+        app: *appname
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: *appname
+          image: k3d-app-registry:30725/masa-base:v1
+          imagePullPolicy: Always
+          #資源配置雖然可以設定基本要求(requests)以及最大上限(limits)，但就管理維運經驗，上線前建議設收斂為固定值，方便後續維運管理
+          resources:
+            requests:
+              cpu: "1"
+              memory: 500Mi
+            limits:
+              cpu: "1"
+              memory: 500Mi
+          # K8s Health Probe 設定，強烈建議要設定，但初期可邊做邊摸索該如何設定
+          # 早期只有 Readiness 、Liveness 兩種 Probe，但近年 K8s 已開始主打 Startup Probe + Liveness Probe
+          # startupProbe:
+          #   httpGet:
+          #     host: localhost
+          #     path: /actuator/health
+          #     port: 7001
+          #   failureThreshold: 30
+          #   periodSeconds: 30
+          # readinessProbe:
+          #   httpGet:
+          #     path: /
+          #     port: 8080
+          #     initialDelaySeconds: 60
+          #     periodSeconds: 10
+          # livenessProbe:
+          #   httpGet:
+          #     host: localhost
+          #     path: /actuator/health
+          #     port: 7001
+          #   initialDelaySeconds: 60
+          #   periodSeconds: 10
+          # 環境參數
+          env:
+            - name: TZ
+              value: Asia/Taipei
+            # openJDK 17預設已採用ZGC，無需特別指定G1
+            # - name: JAVA_TOOL_OPTIONS
+            #   value: >-
+            #     # -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions
+            #     -XX:+UseCGroupMemoryLimitForHeap
+            - name: spring.profiles.active
+              value: dev
+            #- name: JAVA_OPTIONS
+            #  value: >-
+            #    -Xms1024m -Xmx1024m
+            # 若有引用APM agent也會放在這個區段
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+            - containerPort: 8787
+              protocol: TCP
+            - containerPort: 7001
+              protocol: TCP
+          volumeMounts:
+            - name: k3d-tst-vlum # 指定使用 volumes 定義的 PVC
+              # mountPath: /logs
+              mountPath: /var/log/masa
+      volumes:
+        - name: k3d-tst-vlum
+          persistentVolumeClaim:
+            claimName: pvc-k3d-tst # 與 PVC 名稱對應(pvc-k3d-tst.yaml 中 metadata 的 name)

@@ -1,0 +1,14 @@
+apiVersion: k3d.io/v1alpha5
+kind: Simple
+metadata:
+  name: k3s-default
+servers: 1
+agents: 0
+image: docker.io/rancher/k3s:v1.25.7-k3s1
+# 預設不會自動建立 registry，但自行增加以供後續使用
+registries:
+  config: | # define contents of the `registries.yaml` file (or reference a file); same as `--registry-config /path/to/config.yaml`
+    mirrors:
+      "localhost:30725":
+        endpoint:
+          - http://k3d-app-registry:30725 # 自建的 registry

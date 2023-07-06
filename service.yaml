@@ -1,0 +1,24 @@
+kind: Service
+apiVersion: v1
+metadata:
+  # name: svc-${apName}
+  name: &svc-appname svc-masa-base-webapp # 此 service 的名子
+  namespace: k3d-tst
+  # 如果平台有支援 prometheus 的 service monitor，請依照平台的指示加入對應的annotation
+  annotations:
+    prometheus.io/scrape: "true"
+  labels:
+    app: masa-base-webapp
+    service: *svc-appname
+spec:
+  selector:
+    app: masa-base-webapp # 要與 deploy.yaml 中的 label 匹配
+  ipFamilies:
+    - IPv4
+  ports:
+    - name: "tcp-8093"
+      protocol: TCP
+      port: 8093 # 外部用戶端或其他服務訪問 Service 的入口端口
+      targetPort: 8080 # Service 將流量轉發到的後端 Pod 的目標端口
+  sessionAffinity: None
+  type: ClusterIP
