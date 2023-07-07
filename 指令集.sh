@@ -30,7 +30,7 @@ k apply -f service.yaml -n k3d-tst
 k apply -f ingress.yaml -n k3d-tst
 
 # logs
-k ${pod-Name} -f
+k ${pod-Name} -f -n k3d-tst
 
 # enter into pod
 k exec -it pod/masa-base-webapp-7688fc7ffd-67qhg -- /bin/bash
