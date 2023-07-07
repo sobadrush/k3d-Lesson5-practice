@@ -1,3 +1,8 @@
+# check registry
+curl -X GET http://k3d-app-registry:30725/v2/_catalog
+curl -X GET http://k3d-app-registry:30725/v2/masa-base/tags/list
+
+# create cluster
 k3d cluster create \
 -p "18093:8093@loadbalancer" \
 -p "17001:7001@loadbalancer" \
