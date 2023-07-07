@@ -10,13 +10,13 @@ metadata:
 spec:
   # 部署更新策略，可以設定為
   # Recreate：先砍後建
-  # RollingUpdate：再多個PDO的狀況下，可進行滾動部署，終止一個POD，就建立一個對應的POD，建議使用預設的 RollingUpdate
+  # RollingUpdate：再多個POD的狀況下，可進行滾動部署，終止一個POD，就建立一個對應的POD，建議使用預設的 RollingUpdate
   strategy:
     type: RollingUpdate
     rollingUpdate:
       maxSurge: 1
       maxUnavailable: 1
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: *appname
@@ -34,15 +34,16 @@ spec:
           resources:
             requests:
               cpu: "1"
-              memory: 500Mi
+              # memory: 500Mi
+              memory: 1Gi
             limits:
               cpu: "1"
-              memory: 500Mi
+              # memory: 500Mi
+              memory: 1Gi
           # K8s Health Probe 設定，強烈建議要設定，但初期可邊做邊摸索該如何設定
           # 早期只有 Readiness 、Liveness 兩種 Probe，但近年 K8s 已開始主打 Startup Probe + Liveness Probe
           # startupProbe:
           #   httpGet:
-          #     host: localhost
           #     path: /actuator/health
           #     port: 7001
           #   failureThreshold: 30
@@ -55,7 +56,6 @@ spec:
           #     periodSeconds: 10
           # livenessProbe:
           #   httpGet:
-          #     host: localhost
           #     path: /actuator/health
           #     port: 7001
           #   initialDelaySeconds: 60
