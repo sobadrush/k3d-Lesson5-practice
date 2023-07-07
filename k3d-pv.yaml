@@ -12,4 +12,4 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath: # 需與 Cluster 建立時的路徑對齊
-    path: "/tmp/k3dvol"
+    path: "/tmp/k3dvol" # --volume /tmp/k3dvolGG:/tmp/k3dvol → 寫冒號右邊的路徑
