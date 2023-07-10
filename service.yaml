@@ -21,4 +21,5 @@ spec:
       port: 8093 # 外部用戶端或其他服務訪問 Service 的入口端口
       targetPort: 8080 # Service 將流量轉發到的後端 Pod 的目標端口
   sessionAffinity: None
-  type: ClusterIP
+  # type: ClusterIP
+  type: LoadBalancer # 這邊要寫 LoadBalancer，才可順利由外部的 18093 連到 8093
