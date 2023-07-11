@@ -30,7 +30,7 @@ spec:
         - name: *appname
           image: k3d-app-registry:30725/masa-base:v1
           imagePullPolicy: Always
-          #資源配置雖然可以設定基本要求(requests)以及最大上限(limits)，但就管理維運經驗，上線前建議設收斂為固定值，方便後續維運管理
+          # 資源配置雖然可以設定基本要求(requests)以及最大上限(limits)，但就管理維運經驗，上線前建議設收斂為固定值，方便後續維運管理
           resources:
             requests:
               cpu: "1"
@@ -42,12 +42,13 @@ spec:
               memory: 1Gi
           # K8s Health Probe 設定，強烈建議要設定，但初期可邊做邊摸索該如何設定
           # 早期只有 Readiness 、Liveness 兩種 Probe，但近年 K8s 已開始主打 Startup Probe + Liveness Probe
-          # startupProbe:
-          #   httpGet:
-          #     path: /actuator/health
-          #     port: 7001
-          #   failureThreshold: 30
-          #   periodSeconds: 30
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 7001
+            # initialDelaySeconds: 180 # container 運行後 Probe 才開始運作。預設是 0 秒
+            failureThreshold: 30 # Probe 偵測失敗的累計次數，超過此數值，即視為放棄服務重啟 container
+            periodSeconds: 30 # Probe 的檢查間隔時間，預設是 10 秒
           # readinessProbe:
           #   httpGet:
           #     path: /
@@ -69,8 +70,10 @@ spec:
             #   value: >-
             #     # -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions
             #     -XX:+UseCGroupMemoryLimitForHeap
-            - name: spring.profiles.active
+            - name: SPRING_PROFILES_ACTIVE # 啟動的 Profile
               value: dev
+            # - name: SPRING_CONFIG_LOCATION # 外部設定檔位置
+            #   value: /app/spring-configs/
             #- name: JAVA_OPTIONS
             #  value: >-
             #    -Xms1024m -Xmx1024m
